@@ -25,6 +25,8 @@ FPS = 60
 clock = pygame.time.Clock()
 NUMBER_OF_STARTS = 200
 NIGHT_BG_COLOR = (5, 0, 50)
+p = " " * (WIDTH_WIN // 2 // 4)
+
 
 
 class Stars(pygame.sprite.Sprite):
@@ -35,18 +37,39 @@ class Stars(pygame.sprite.Sprite):
         self.pos = random.randrange(WIDTH_WIN), random.randrange(HEIGHT_WIN)
         self.image = pygame.Surface((self.size*2, self.size*2))
         pygame.draw.circle(self.image, pygame.Color(
-           random.choice(COLOR[238:262])), [self.size, self.size], self.size)
-        self.rect = self.image.get_rect(center=self.pos)  
+            random.choice(COLOR[238:262])), [self.size, self.size], self.size)
+        self.rect = self.image.get_rect(center=self.pos)
 
 
 
-sprites = pygame.sprite.LayeredUpates()             
+class Planet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image_orig = pygame.image.load(os.path.join(path, '6s.png'))
+        self.image = self.image_orig.copy()
+        self.rect = self.image.get_rect(center=(x, y))
+        self.rot = 0
+        self.angle = .5    
+
+
+    def update(self):
+        self.rot = (self.rot + self.angle) % 360
+        self.image = pygame.transform.rotate(self.image_orig, self.rot)
+        self.rect = self.image.get_rect(center=self.rect.center)
+        
+
+
+sprites = pygame.sprite.LayeredUpdates()            
 for _ in range(NUMBER_OF_STARTS):
     stars = Stars()
     sprites.add(stars, layer=0)    
 
+p1 = planet(WIDTH_WIN // 3, HEIGHT_WIN // 2)
+sprites.add(p1, layer=0)
+
 run = True
 while run:
+    clock.tick(FPS)
     for e in pygame.event.get():
         if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
             run = False
@@ -55,3 +78,4 @@ while run:
     screen.fill(NIGHT_BG_COLOR)
     sprites.draew(screen)
     pygame.display.update()
+    pygame.display.set_caption(f'Stars {p}FPS: {int(clock.get_fps())}')
